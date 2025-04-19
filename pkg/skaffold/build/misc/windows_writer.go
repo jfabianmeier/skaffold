@@ -31,7 +31,7 @@ func NewWindowsToUTF8Writer(w io.Writer) io.Writer {
 }
 
 func (w *windowsToUTF8Writer) Write(p []byte) (int, error) {
-	decoder := charmap.CodePage850.NewDecoder()
+	decoder := charmap.Windows1252.NewDecoder()
 
 	transformedWriter := transform.NewWriter(w.wrappedWriter, decoder)
 

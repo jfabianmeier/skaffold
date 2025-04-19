@@ -19,8 +19,10 @@ package jib
 import (
 	"context"
 	"fmt"
+	"github.com/GoogleContainerTools/skaffold/v2/pkg/skaffold/build/misc"
 	"io"
 	"os/exec"
+	"runtime"
 
 	"github.com/GoogleContainerTools/skaffold/v2/pkg/skaffold/docker"
 	"github.com/GoogleContainerTools/skaffold/v2/pkg/skaffold/output"
@@ -65,8 +67,13 @@ func (b *Builder) buildJibMavenToRegistry(ctx context.Context, out io.Writer, wo
 func (b *Builder) runMavenCommand(ctx context.Context, out io.Writer, workspace string, args []string) error {
 	cmd := MavenCommand.CreateCommand(ctx, workspace, args)
 	cmd.Env = append(util.OSEnviron(), b.localDocker.ExtraEnv()...)
-	cmd.Stdout = out
-	cmd.Stderr = out
+	if runtime.GOOS == "windows" {
+		cmd.Stdout = misc.NewWindowsToUTF8Writer(out)
+		cmd.Stderr = misc.NewWindowsToUTF8Writer(out)
+	} else {
+		cmd.Stdout = out
+		cmd.Stderr = out
+	}
 
 	log.Entry(ctx).Infof("Building %s: %s, %v", workspace, cmd.Path, cmd.Args)
 	if err := util.RunCmd(ctx, &cmd); err != nil {
