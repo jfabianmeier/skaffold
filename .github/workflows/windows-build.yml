@@ -38,6 +38,7 @@ jobs:
           path: out/
 
       - name: Create GitHub Release
+        id: create_release # ID wird gesetzt, um Outputs zu referenzieren
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -52,7 +53,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # Upload-URL vom vorherigen Schritt
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # Abruf der Upload-URL
           asset_path: out/skaffold-windows-amd64.exe                 # Der Pfad zur hochzuladenden Datei
           asset_name: skaffold-windows-amd64.exe                    # Name des Assets
-          asset_content_type: application/octet-stream              # Content-Type                       # Lade alle Dateien im out/ Verzeichnis hoch
+          asset_content_type: application/octet-stream              # Content-Type
