@@ -7,7 +7,6 @@ on:
       - '*'
       - '!refs/tags/*' # Optional: Tags ausschließen (falls nicht benötigt)
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
