@@ -37,21 +37,22 @@ jobs:
           name: build-artifacts
           path: out/
 
-      # Erstelle ein Release und lade Artefakte hoch
       - name: Create GitHub Release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }} # Nutzt den aktuellen Tag
-          release_name: Release ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}           # Nutzt den aktuellen Tag
+          release_name: Release ${{ github.ref_name }} # Setzt den Releasenamen
           draft: false
           prerelease: false
 
-      - name: Upload Release Assets
-        uses: softprops/action-gh-release@v2
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }}           # Nutze den aktuellen Tag
-          files: out/skaffold-windows-amd64.exe                           # Lade alle Dateien im out/ Verzeichnis hoch
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # Upload-URL vom vorherigen Schritt
+          asset_path: out/skaffold-windows-amd64.exe                 # Der Pfad zur hochzuladenden Datei
+          asset_name: skaffold-windows-amd64.exe                    # Name des Assets
+          asset_content_type: application/octet-stream              # Content-Type                       # Lade alle Dateien im out/ Verzeichnis hoch
