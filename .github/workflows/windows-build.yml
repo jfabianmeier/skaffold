@@ -1,22 +1,23 @@
-name: Build and Upload Artifacts
+name: Build and Release Artifacts
 
 on:
-  push:        # Trigger bei jedem Push
-  pull_request: # Trigger bei jedem Pull Request
-    branches:
-      - '*'
-      - '!refs/tags/*' # Optional: Tags ausschließen (falls nicht benötigt)
+  push:
+    tags:
+      - '*' # Der Workflow wird nur bei Tags ausgeführt
+  workflow_dispatch: # Ermöglicht manuelles Starten
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      # Set up Go
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: 1.24.1
         id: go
+
       # Checkout des Codes
       - name: Check out repository
         uses: actions/checkout@v4
@@ -35,3 +36,22 @@ jobs:
         with:
           name: build-artifacts
           path: out/
+
+      # Erstelle ein Release und lade Artefakte hoch
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }} # Nutzt den aktuellen Tag
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}           # Nutze den aktuellen Tag
+          files: out/*                              # Lade alle Dateien im out/ Verzeichnis hoch
