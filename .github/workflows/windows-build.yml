@@ -54,4 +54,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref_name }}           # Nutze den aktuellen Tag
-          files: out/*                              # Lade alle Dateien im out/ Verzeichnis hoch
+          files: out/skaffold-windows-amd64.exe                           # Lade alle Dateien im out/ Verzeichnis hoch
