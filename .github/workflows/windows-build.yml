@@ -1,0 +1,33 @@
+name: Build and Upload Artifacts
+
+on:
+  push:        # Trigger bei jedem Push
+  pull_request: # Trigger bei jedem Pull Request
+    branches:
+      - '*'
+      - '!refs/tags/*' # Optional: Tags ausschließen (falls nicht benötigt)
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout des Codes
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      # Setze Abhängigkeiten auf (falls nötig)
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y make
+
+      # Baue das Programm mit `make cross`
+      - name: Build with make cross
+        run: make cross
+
+      # Archiviere und lade das out-Verzeichnis hoch
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: out/
