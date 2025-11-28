@@ -66,11 +66,14 @@ func (b *Builder) retrieveCmd(ctx context.Context, out io.Writer, a *latest.Arti
 	// env variables.
 	if runtime.GOOS == "windows" {
 		cmd = exec.CommandContext(ctx, "cmd.exe", "/C", command)
+		cmd.Stdout = misc.NewWindowsToUTF8Writer(out)
+		cmd.Stderr = misc.NewWindowsToUTF8Writer(out)
+
 	} else {
 		cmd = exec.CommandContext(ctx, "sh", "-c", command)
+		cmd.Stdout = out
+		cmd.Stderr = out
 	}
-	cmd.Stdout = out
-	cmd.Stderr = out
 
 	env, err := b.retrieveEnv(a, tag, platforms)
 	if err != nil {

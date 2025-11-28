@@ -1,0 +1,59 @@
+name: Build and Release Artifacts
+
+on:
+  push:
+    tags:
+      - '*' # Der Workflow wird nur bei Tags ausgeführt
+  workflow_dispatch: # Ermöglicht manuelles Starten
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Set up Go
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.24.1
+        id: go
+
+      # Checkout des Codes
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Setze Abhängigkeiten auf (falls nötig)
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y make
+
+      # Baue das Programm mit `make cross`
+      - name: Build with make cross
+        run: make cross
+
+      # Archiviere und lade das out-Verzeichnis hoch
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: out/
+
+      - name: Create GitHub Release
+        id: create_release # ID wird gesetzt, um Outputs zu referenzieren
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}           # Nutzt den aktuellen Tag
+          release_name: Release ${{ github.ref_name }} # Setzt den Releasenamen
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # Abruf der Upload-URL
+          asset_path: out/skaffold-windows-amd64.exe                 # Der Pfad zur hochzuladenden Datei
+          asset_name: skaffold-windows-amd64.exe                    # Name des Assets
+          asset_content_type: application/octet-stream              # Content-Type
